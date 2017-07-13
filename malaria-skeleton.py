@@ -62,3 +62,12 @@ plt.show(block=True)
 cellmeans = datar.groupby(('infection', 'cell number')).mean().reset_index()
 sns.boxplot(x='infection', y='branch-distance', hue='cell number', data=cellmeans)
 plt.show(block=True)
+
+_, bins = np.histogram(datar['branch-distance'], bins='auto')
+
+fig, ax = plt.subplots()
+for inf, df in datar.groupby('infection'):
+    ax.hist(df['branch-distance'], bins=bins, normed=True,
+            alpha=0.5, label=inf)
+ax.legend()
+plt.show(block=True)
