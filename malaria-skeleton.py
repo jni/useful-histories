@@ -5,7 +5,7 @@ import pandas as pd
 import re  # regular expressions, for text matching
 import seaborn.apionly as sns
 
-data = pd.read_excel('/Users/jni/Dropbox/data1/malaria/adam-oli-schizont-30sec-output/skeleton.xlsx')
+#data = pd.read_excel('/Users/jni/Dropbox/data1/malaria/adam-oli-schizont-30sec-output/skeleton.xlsx')
 
 def infection_status(filename):
     if 'Uninf' in filename:
@@ -13,7 +13,7 @@ def infection_status(filename):
     else:
         return 'infected'
     
-data['infection'] = data['filename'].apply(infection_status)
+#data['infection'] = data['filename'].apply(infection_status)
 
 def cell_number(filename):
     regex = r'.*RBC(\d+)_\d\d.tif'
@@ -33,13 +33,14 @@ def field_number(filename):
     else:
         return None
     
-data['cell number'] = data['filename'].apply(cell_number)
-data['field number'] = data['filename'].apply(field_number)
+#data['cell number'] = data['filename'].apply(cell_number)
+#data['field number'] = data['filename'].apply(field_number)
 
 # save the full data with additional columns
 directory = '/Users/jni/Dropbox/data1/malaria/adam-oli-schizont-30sec-output'
-data.to_hdf(os.path.join(directory, 'skeleton-preprocess.hdf'), key='pre0')
-
+#data.to_hdf(os.path.join(directory, 'skeleton-preprocess.hdf'), key='pre0')
+data = pd.read_hdf(os.path.join(directory, 'skeleton-preprocess.hdf'),
+                   key='pre0')
 # subset the data to only have specific shape index and branch type
 ridges = ((data['mean shape index'] < 0.625) &
           (data['mean shape index'] > 0.125))
