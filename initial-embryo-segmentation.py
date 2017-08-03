@@ -2,6 +2,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import io, segmentation, filters, feature, morphology
+import matplotlib.pyplot as plt
 
 # load in data
 droso = io.imread('/Users/jni/Dropbox/data1/drosophila-embryo/E_z2_512_1um_CONTROL.tif') / 4096
@@ -28,15 +29,16 @@ seeds, nseeds = ndi.label(centroids)
 membranes = ndi.map_coordinates(droso[..., 1], interp_coords)
 
 # Perform watershed segmentation
+# Note, this currently takes quite a while, known issue on scikit-image
 seg = morphology.watershed(membranes, seeds, compactness=0.01)
 
 # Optional: visualise the segmentation. This is still clunky.
-labels = np.arange(nseeds + 1)
-np.random.shuffle(labels)
-colors = plt.cm.spectral(labels[seg]/labels[seg].max())
 # Uncomment these lines to be able to use the slice viewer
-# sys.path.append('/Users/jni/projects/mpl-volume-viewer/')
-# import slice_view as sv
+#sys.path.append('/Users/jni/projects/mpl-volume-viewer/')
+#import slice_view as sv
+#labels = np.arange(nseeds + 1)
+#np.random.shuffle(labels)
+#colors = plt.cm.spectral(labels[seg]/labels[seg].max())
 #viewer = sv.SliceViewer(colors)
 #viewer = sv.SliceViewer(np.stack((nuclei, membranes, nuclei), axis=-1))
 
@@ -105,3 +107,5 @@ directions = [covmat2direction(moments2cov(m))
 # - find the distribution of eccentricity
 # - find the variance of direction between neighbouring cells. This requires
 #   the neighbourhood graph.
+# - realign cells according to their direction vector, and measure the
+#   polarity of the 3rd channel based on that alignment.
