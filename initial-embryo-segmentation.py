@@ -94,7 +94,6 @@ def covmat2direction(covmat):
     return ecc, evecs[:, sorted_evals[-1]]
 
 
-covmat2direction(mat)
 directions = [covmat2direction(moments2cov(m))
               for m in seg_moments]
 
