@@ -97,7 +97,6 @@ scale_str = b'\n[root]\nfoo=bar\n[Scan]\nPixelHeight=' + str(scale).encode('asci
 with open(lastfn, 'ab') as fout:
     fout.write(scale_str)
 imreload2 = iio.imread(lastfn, format='fei')
-x = b'
 scale_str = b'\r\nDate=13/10/2017\r\n[Scan]\r\nPixelHeight=' + str(scale).encode('ascii') + b'\r\n'
 iio.imsave(lastfn, im)
 with open(lastfn, 'ab') as fout:
