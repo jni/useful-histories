@@ -1,10 +1,12 @@
 # IPython log file
 
-
+import numpy as np
 import os
 import sys
 sys.path.append('/Users/jni/projects/unfold-embryo')
 sys.path.append('/Users/jni/projects/skan')
+sys.path.append('/Users/jni/projects/storm-cluster')
+from skimage import filters, morphology, io
 
 from gala import imio
 import unfold
@@ -21,4 +23,8 @@ c1 = unfold.coord1_volume(b2)
 image = io.imread('embA_0.3um.tif')[::2, ::2, ::2]
 channels = [unfold.sample2d(c0, c1, image[..., c])
             for c in range(3)]
-            
+import stormcluster as sc
+image = sc._stretchlim(np.stack(channels, axis=2))
+import matplotlib.pyplot as plt
+plt.imshow(image)
+plt.show()
