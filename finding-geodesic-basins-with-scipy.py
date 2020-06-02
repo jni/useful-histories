@@ -1,4 +1,5 @@
 # IPython log file
+# See https://stackoverflow.com/questions/62135639/mcp-geometrics-for-calculating-marketsheds/62144556
 import numpy as np
 from scipy import sparse
 from skimage import graph
