@@ -3,6 +3,7 @@
 
 import napari
 import skan
+import numpy as np
 from matplotlib import cm
 from skimage import io
 from skimage.filters import gaussian
@@ -61,7 +62,7 @@ pruned = skeleton.prune_paths(np.flatnonzero(to_cut))
 # some branches are merged in the new skeleton, so properties need to be
 # recomputed.
 summary_pruned = skan.summarize(pruned)
-summary_pruned['index'] = np.arange(summary2.shape[0]) + 1
+summary_pruned['index'] = np.arange(summary_pruned.shape[0]) + 1
 viewer.add_labels(np.asarray(pruned), name='pruned', properties=summary_pruned)
 
 #########
@@ -118,3 +119,5 @@ labels_layer.color = color_dict
 
 # You can save pandas dataframes, e.g.
 summary_float_pruned.to_csv('data.csv')
+
+napari.run()
