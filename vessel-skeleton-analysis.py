@@ -1,27 +1,35 @@
-# From pairing session Juan <> Marlene 2021-05-06
 
+# From pairing session Juan <> Marlene 2021-05-06
 
 import napari
 import skan
-import numpy as np
 from matplotlib import cm
 from skimage import io
+from skimage.exposure import exposure
 from skimage.filters import gaussian
 from skimage.filters import threshold_mean
+from skimage.filters import frangi
 from skimage.morphology import remove_small_holes
 from skimage.morphology import skeletonize
 from scipy.ndimage import distance_transform_edt
+import numpy as np
 
-
-image = io.imread('control-1.lsm-C3-MAX.tiff')
+image = io.imread('./control-1.lsm-C3-MAX.tiff')
 viewer = napari.view_image(image)
-
-gaussian_original_image = gaussian(image, sigma=1.5)
+gamma_corrected = exposure.adjust_gamma(image, 1.5)
+viewer.add_image(gamma_corrected)
+gaussian_original_image = gaussian(gamma_corrected, sigma=2)
 mean_thresh_gaussian = threshold_mean(gaussian_original_image)
 mean_binary = gaussian_original_image > mean_thresh_gaussian # create binary mask
-remove_holes_binary = remove_small_holes(mean_binary, area_threshold=64)
+viewer.add_labels(mean_binary)
+frangi_mean = frangi(mean_binary, sigmas=2)
+viewer.add_image(frangi_mean)
+#skeleton_holy_binary = skeletonize(mean_binary)
+#viewer.add_labels(skeleton_holy_binary)
+remove_holes_binary = remove_small_holes(mean_binary, area_threshold=150)
 skeleton_mean_binary = skeletonize(remove_holes_binary)
 viewer.add_labels(remove_holes_binary)
+
 
 # create a skeleton object with skan
 skeleton = skan.Skeleton(skeleton_mean_binary)
@@ -87,12 +95,25 @@ skeleton_float = skan.Skeleton(
 # For fun with units, check out the "pint" library
 summary_float = skan.summarize(skeleton_float)
 to_cut = (
-        (summary_float['branch-distance'] < 20 * spacing)
+        (summary_float['branch-distance'] < 50 * spacing)
         & (summary_float['branch-type'] < 2)
         )
 pruned_float = skeleton_float.prune_paths(np.flatnonzero(to_cut))
 summary_float_pruned = skan.summarize(pruned_float)
 summary_float_pruned['index'] = np.arange(summary_float_pruned.shape[0]) + 1
+
+# Calculate the tortuosity of each branch
+# We define tortuosity as total branch length divided by Euclidean distance
+# between the endpoints (ranges [1, ∞))
+summary_float_pruned['tortuosity'] = (
+        summary_float_pruned['branch-distance']
+        / summary_float_pruned['euclidean-distance']
+        )
+
+# Change the next line if you want only a subset of columns
+columns_we_want = summary_float_pruned.columns
+summary_only_relevant = summary_float_pruned[columns_we_want]
+
 labels_layer = viewer.add_labels(
         np.asarray(pruned_float),
         name='pruned float',
@@ -118,6 +139,5 @@ color_dict = dict(zip(summary_float_pruned['index'], label_color))
 labels_layer.color = color_dict
 
 # You can save pandas dataframes, e.g.
-summary_float_pruned.to_csv('data.csv')
-
+summary_only_relevant.to_csv('data.csv')
 napari.run()
