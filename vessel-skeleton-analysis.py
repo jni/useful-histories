@@ -130,9 +130,10 @@ labels_layer = viewer.add_labels(
 # uint8s in [0, 255].
 # viridis is one of many colormaps provided by matplotlib. See:
 # https://matplotlib.org/stable/tutorials/colors/colormaps.html
+display_value = 'tortuosity'  # change to 'mean-pixel-value' for width
 label_color = cm.viridis(
-        summary_float_pruned['mean-pixel-value']
-        / np.max(summary_float_pruned['mean-pixel-value'])
+        summary_float_pruned[display_value]
+        / np.max(summary_float_pruned[display_value])
         )
 # next, create the dictionary from the index to each color
 color_dict = dict(zip(summary_float_pruned['index'], label_color))
