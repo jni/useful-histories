@@ -5,7 +5,8 @@ import os
 import dask.array as da
 import napari
 import numpy as np
-from skimage import feature
+import pandas as pd
+from skimage import feature, measure
 
 datadir = os.path.expanduser('~/Dropbox/data/Deep learning training')
 
@@ -49,6 +50,7 @@ viewer.add_points(
     name='pia',
     edge_color='white',
     size=np.where(matches0, 1, 3),
+    symbol='ring',
     face_color={
         'colors': 'matched',
         'categorical_colormap': {True: 'black', False: 'yellow'},
@@ -62,6 +64,7 @@ viewer.add_points(
     name='volga',
     edge_color='white',
     size=np.where(matches1, 1, 3),
+    symbol='ring',
     face_color={
         'colors': 'matched',
         'categorical_colormap': {True: 'black', False: 'cyan'},
@@ -70,3 +73,5 @@ viewer.add_points(
     scale=viewer.layers[0].scale,
     properties={'matched': matches1},
 )
+
+napari.run()
