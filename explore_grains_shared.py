@@ -123,7 +123,7 @@ def take_shear_data(grainID, DicMap):
                            np.nan,
                            dtype=type(DicMap[grainID].maxShearList[0]))
 
-    coord_array = np.array(DicMap[grainID].coordList)
+    coord_array = np.array(DicMap[grainID].coordList)[:, [1, 0]]
     data_array = np.array(DicMap[grainID].maxShearList)
     grainMapData[tuple(np.transpose(coord_array - [Y0, X0]))] = data_array
 
