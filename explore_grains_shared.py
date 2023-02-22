@@ -27,7 +27,7 @@ import csv
 
 def get_slipsystem_info(grainID, DicMap):
     """Grab slip system for a specific grain.
-    
+
     Parameters
     ----------
     grainID : int
@@ -90,7 +90,7 @@ def get_slipsystem_info(grainID, DicMap):
 # Extract the Grain data (eMaxShear)
 def take_shear_data(grainID, DicMap):
     """Find e_max_shear for specific grain.
-    
+
     Parameters
     ----------
     grainID : int
@@ -144,10 +144,10 @@ def signaltonoise(a, axis=0, ddof=0):
 
 def sb_angle(shear_map, threshold=None, median_filter=None):
     """Compute slip band angles based on shear map.
-    
+
     Uses a threshold to reduce noise, optionally followed by a median filter,
     then a radon transform to find the angles.
-    
+
     Parameters
     ----------
     shear_map : numpy ndarray, shape (M, N)
@@ -236,7 +236,7 @@ def detect_angle(list1, Index):
 #Save all the angles detected
 def save_detected_angles(list1, Index):
     """Same as `detect_angle` but return *all* detected angles, not just max.
-    
+
     Parameters
     ----------
     list1 : list of float
@@ -267,7 +267,7 @@ def save_detected_angles(list1, Index):
 #Check if there is a second peak
 def bi_slip_check(SDA, bottom):
     """Check whether there are two slips.
-    
+
     Parameters
     ----------
     SDA : list of int
@@ -290,7 +290,7 @@ def bi_slip_check(SDA, bottom):
 
 def get_slipsystem_info2(grainID, DicMap):
     """Grab slip system for a specific grain.
-    
+
     Parameters
     ----------
     grainID : int
@@ -336,7 +336,7 @@ def get_slipsystem_info2(grainID, DicMap):
 
 def Plotsliptrace(k, DicMap):
     """Plot the slip trace.
-    
+
     k: grainID
     DicMap: defdap.hrdic.Map
     """
@@ -413,7 +413,7 @@ def matching(detected_angle, theo_angle):
 def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
               DicMap, Noise_lim):
     """Run all the functionality in the library for a given grain.
-    
+
     This function runs:
         - grain plot
         - grab slip system info
@@ -651,7 +651,7 @@ def grain_explorer_traces(n,
                           Noise_lim='None',
                           Grain_filter=2500):
     """Function to explore grain traces for given stretch timestep.
-    
+
     Parameters
     ----------
     n : int
