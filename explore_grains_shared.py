@@ -14,9 +14,11 @@ from scipy import signal
 from skimage.transform import radon, rescale, resize, frt2
 from matplotlib import gridspec
 from skimage.transform import (hough_line, hough_line_peaks)
+from skimage import measure
 
 from defdap.plotting import Plot, GrainPlot
 from scipy import ndimage
+from tqdm import tqdm
 
 import warnings
 
@@ -694,83 +696,89 @@ def grain_explorer_traces(n,
         writer.writerow(header)
     csvfile.close()
 
-    #for k in range(0,100): ## for testing, only run a small number of grains
-    for k in range(0, len(DicMap.grainList)):
-        grainMapData = take_shear_data(k, DicMap=DicMap)
-        if len(DicMap[k].maxShearList) > Grain_filter:
-            print('Grain: ', k)
-            dir = os.path.join(folder_name +
-                               '/Step {0}/Grain {1}'.format(n, k))
-            if not os.path.exists(dir):
-                os.mkdir(dir)
+    grains = np.clip(DicMap.grains, 0, None)
+    grains[grains > 0] += 1
+    max_shear = DicMap.crop(DicMap.data.max_shear)
+    props = [prop
+            for prop in measure.regionprops(grains, max_shear)
+            if prop.area > Grain_filter]
+    for prop in tqdm(props):
+        k = prop.label
+        # grainMapData = take_shear_data(k, DicMap=DicMap)
+        grainMapData = prop.intensity_image
+        grainMapData[~prop.image] = np.nan
+        dir = os.path.join(folder_name +
+                           '/Step {0}/Grain {1}'.format(n, k))
+        if not os.path.exists(dir):
+            os.mkdir(dir)
 
-            DicMap[k].plotMaxShear(plotColourBar=True,
-                                   plotScaleBar=True,
-                                   vmin=0,
-                                   vmax=0.1)
-            plt.savefig(folder_name +
-                        '/Step {0}/Grain {1}/Grain profile'.format(n, k),
-                        dpi=300)
-            plt.close()
+        DicMap[k].plotMaxShear(plotColourBar=True,
+                               plotScaleBar=True,
+                               vmin=0,
+                               vmax=0.1)
+        plt.savefig(folder_name +
+                    '/Step {0}/Grain {1}/Grain profile'.format(n, k),
+                    dpi=300)
+        plt.close()
 
-            Plotsliptrace(k, DicMap=DicMap)
-            plt.savefig(folder_name +
-                        '/Step {0}/Grain {1}/4 Slip traces'.format(n, k),
-                        dpi=300)
-            plt.close()
+        Plotsliptrace(k, DicMap=DicMap)
+        plt.savefig(folder_name +
+                    '/Step {0}/Grain {1}/4 Slip traces'.format(n, k),
+                    dpi=300)
+        plt.close()
 
-            # gert the mean max shear strain of the grain
-            mean_shear_strain = np.mean(DicMap[k].maxShearList)
-            detect_threshold = max(1.6 * mean_shear_strain, 0.013)
+        # gert the mean max shear strain of the grain
+        mean_shear_strain = np.mean(DicMap[k].maxShearList)
+        detect_threshold = max(1.6 * mean_shear_strain, 0.013)
 
-            # get the theo angle
-            theo_angle, SF_list = get_slipsystem_info(k, DicMap=DicMap)
+        # get the theo angle
+        theo_angle, SF_list = get_slipsystem_info(k, DicMap=DicMap)
 
-            # get the experimental angle
-            angle_list, angle_index = sb_angle(grainMapData,
-                                               threshold=detect_threshold,
-                                               median_filter=3)
+        # get the experimental angle
+        angle_list, angle_index = sb_angle(grainMapData,
+                                           threshold=detect_threshold,
+                                           median_filter=3)
 
-            plt.savefig(folder_name + '/Step {0}/Grain {1}/Radon'.format(n, k),
-                        dpi=300)
-            plt.close()
+        plt.savefig(folder_name + '/Step {0}/Grain {1}/Radon'.format(n, k),
+                    dpi=300)
+        plt.close()
 
-            #detected_angle = detect_angle(angle_list,angle_index)
-            #SDA,bottom = save_detected_angles(angle_list,angle_index)
-            #MT = matching(detected_angle,theo_angle)
+        #detected_angle = detect_angle(angle_list,angle_index)
+        #SDA,bottom = save_detected_angles(angle_list,angle_index)
+        #MT = matching(detected_angle,theo_angle)
 
-            Sb_dected, MT, detected_angle, detected_angle2 = check_all(
-                k,
-                angle_list=angle_list,
-                theo_angle=theo_angle,
-                angle_index=angle_index,
-                shear_map=grainMapData,
-                threshold=detect_threshold,
-                DicMap=DicMap,
-                Noise_lim=Noise_lim)
+        Sb_dected, MT, detected_angle, detected_angle2 = check_all(
+            k,
+            angle_list=angle_list,
+            theo_angle=theo_angle,
+            angle_index=angle_index,
+            shear_map=grainMapData,
+            threshold=detect_threshold,
+            DicMap=DicMap,
+            Noise_lim=Noise_lim)
 
-            plt.savefig(folder_name + '/Step {0}/Check/Grain {1}'.format(n, k),
-                        dpi=300)
-            plt.close()
+        plt.savefig(folder_name + '/Step {0}/Check/Grain {1}'.format(n, k),
+                    dpi=300)
+        plt.close()
 
-            if detected_angle2 != 'None':
-                detected_angles = []
-                detected_angles.append(detected_angle)
-                detected_angles.append(detected_angle2)
-                data_rows = [[
-                    k, theo_angle[0], detected_angles, MT, Sb_dected,
-                    SF_list[0], SF_list[1], SF_list[2], SF_list[3]
-                ]]
-            else:
-                data_rows = [[
-                    k, theo_angle[0], detected_angle, MT, Sb_dected,
-                    SF_list[0], SF_list[1], SF_list[2], SF_list[3]
-                ]]
+        if detected_angle2 != 'None':
+            detected_angles = []
+            detected_angles.append(detected_angle)
+            detected_angles.append(detected_angle2)
+            data_rows = [[
+                k, theo_angle[0], detected_angles, MT, Sb_dected,
+                SF_list[0], SF_list[1], SF_list[2], SF_list[3]
+            ]]
+        else:
+            data_rows = [[
+                k, theo_angle[0], detected_angle, MT, Sb_dected,
+                SF_list[0], SF_list[1], SF_list[2], SF_list[3]
+            ]]
 
-            with open(folder_name + '/information {}.csv'.format(n),
-                      'a',
-                      newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerows(data_rows)
-            csvfile.close()
+        with open(folder_name + '/information {}.csv'.format(n),
+                  'a',
+                  newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(data_rows)
+        csvfile.close()
     print('Step:', n)
