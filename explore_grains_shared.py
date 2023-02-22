@@ -703,7 +703,7 @@ def grain_explorer_traces(n,
             for prop in measure.regionprops(grains, max_shear)
             if prop.area > Grain_filter]
     for prop in tqdm(props):
-        k = prop.label
+        k = prop.label - 1  # position in DicMap list
         # grainMapData = take_shear_data(k, DicMap=DicMap)
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
