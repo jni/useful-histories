@@ -707,19 +707,6 @@ def grain_explorer_traces(n,
         # grainMapData = take_shear_data(k, DicMap=DicMap)
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
-        dir = os.path.join(folder_name +
-                           '/Step {0}/Grain {1}'.format(n, k))
-        if not os.path.exists(dir):
-            os.mkdir(dir)
-
-        DicMap[k].plotMaxShear(plotColourBar=True,
-                               plotScaleBar=True,
-                               vmin=0,
-                               vmax=0.1)
-        plt.savefig(folder_name +
-                    '/Step {0}/Grain {1}/Grain profile'.format(n, k),
-                    dpi=300)
-        plt.close()
 
         Plotsliptrace(k, DicMap=DicMap)
         plt.savefig(folder_name +
