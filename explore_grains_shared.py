@@ -316,61 +316,58 @@ def get_slipsystem_info2(grainID, DicMap):
     DicMap[grainID].ebsdGrain.calcSlipTraces()
     ST_Angle = np.rad2deg(DicMap[grainID].ebsdGrain.slipTraceAngles)
 
-    # print the slip plane of each trace, the max Schmid factor of it and its angle (by degree)
-
-    # todo: make this a data frame rather than a list of lists.
-    info_frame = []
-    for i in range(0, 4):
-        info_frame.append([])
-        info_frame[i].append('Slip plane {0}:'.format(i + 1))
-        info_frame[i].append(ssGroup[i][0].slipPlaneLabel)
-        info_frame[i].append('| SF:')
-        info_frame[i].append(max(SchmidFactor[i]).round(3))
-        info_frame[i].append('| Angle:')
-        info_frame[i].append(ST_Angle[i].round(2))
-
-    #Order the slip planes by the Schmid Factor
-    info_frame = sorted(info_frame, reverse=True, key=lambda x: (x[3]))
-
-    #print(info_frame)
-    return info_frame
+    ids = np.arange(1, 5)
+    labels = [ssGroup[i][0].slipPlaneLabel for i in range(4)]
+    sfs = [max(schmidFactor[i]) for i in range(4)]
+    angles = [ST_Angle[i] for i in range(4)]
+    frame = pd.DataFrame({
+            'slip_plane': ids,
+            'slip_plane_label': labels,
+            'sf': sfs,
+            'angle_degrees': angles,
+            'color': ['blue', 'green', 'red', 'purple'],
+            })
+    frame_sorted = frame.sort_values(
+            by='sf', ascending=False, ignore_index=True
+            )
+    return frame_sorted
 
 
-def Plotsliptrace(k, DicMap):
+def plot_slip_trace(k, DicMap, axes=None):
     """Plot the slip trace.
 
     k: grainID
     DicMap: defdap.hrdic.Map
+    axes: List[Axes], optional
+        A list of three matplotlib axes on which to plot the GrainPlot (with
+        the shear angles), the possible slip angles, and the shear data.
     """
-    fig = plt.figure(figsize=(13, 4))
-    gs = gridspec.GridSpec(1, 3)
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1])
-    ax2 = plt.subplot(gs[2])
+    if axes is None:
+        fig = plt.figure(figsize=(13, 4))
+        gs = gridspec.GridSpec(1, 3)
+        ax0 = plt.subplot(gs[0])
+        ax1 = plt.subplot(gs[1])
+        ax2 = plt.subplot(gs[2])
+    else:
+        ax0, ax1, ax2 = axes
 
     slipPlot = GrainPlot(fig=fig, callingGrain=DicMap[k], ax=ax0)
     slipPlot.addSlipTraces(topOnly=True)
-    info_frame = get_slipsystem_info2(k, DicMap=DicMap)
+    ax0.axis('off')
 
-    for i in range(0, len(info_frame)):
-        if info_frame[i][0] == 'Slip plane 1:':
-            Color = 'blue'
-        elif info_frame[i][0] == 'Slip plane 2:':
-            Color = 'green'
-        elif info_frame[i][0] == 'Slip plane 3:':
-            Color = 'red'
-        elif info_frame[i][0] == 'Slip plane 4:':
-            Color = 'purple'
-        ax1.text(0, 1 - 0.2 * i, '{}'.format(info_frame[i]), color=Color)
+    info_frame = get_slipsystem_info2(k, DicMap=DicMap)
+    for row, color in zip(
+            info_frame.drop('color').itertuples(index=False, name='ST'),
+            info_frame['color']
+            ):
+        ax1.text(0, 1 - 0.2 * i, str(row), color=color)
+    ax1.axis('off')
 
     grainMapData = take_shear_data(k, DicMap=DicMap)
-    im = ax2.imshow(grainMapData,
-                    vmin=0,
-                    vmax=0.1,
-                    interpolation='bilinear',
-                    cmap='viridis')
-    ax0.axis('off')
-    ax1.axis('off')
+    im = ax2.imshow(
+            grainMapData,
+            vmin=0, vmax=0.1, interpolation='bilinear', cmap='viridis',
+            )
     ax2.axis('off')
 
 
@@ -708,7 +705,7 @@ def grain_explorer_traces(n,
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
 
-        Plotsliptrace(k, DicMap=DicMap)
+        plot_slip_trace(k, DicMap=DicMap)
         plt.savefig(folder_name +
                     '/Step {0}/Grain {1}/4 Slip traces'.format(n, k),
                     dpi=300)
