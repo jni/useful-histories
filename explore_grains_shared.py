@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load quat, ebsd and hrdic packages from defdap package
@@ -310,7 +311,7 @@ def get_slipsystem_info2(grainID, DicMap):
     ssGroup = DicMap[grainID].ebsdGrain.phase.slipSystems
 
     #Calculate the schmid factor of each slip system
-    SchmidFactor = DicMap[grainID].ebsdGrain.averageSchmidFactors
+    schmidFactor = DicMap[grainID].ebsdGrain.averageSchmidFactors
 
     #Calculate the slip trace angles
     DicMap[grainID].ebsdGrain.calcSlipTraces()
@@ -350,16 +351,18 @@ def plot_slip_trace(k, DicMap, axes=None):
         ax2 = plt.subplot(gs[2])
     else:
         ax0, ax1, ax2 = axes
+        fig = ax0.figure
 
     slipPlot = GrainPlot(fig=fig, callingGrain=DicMap[k], ax=ax0)
     slipPlot.addSlipTraces(topOnly=True)
     ax0.axis('off')
 
     info_frame = get_slipsystem_info2(k, DicMap=DicMap)
-    for row, color in zip(
-            info_frame.drop('color').itertuples(index=False, name='ST'),
+    for i, (row, color) in enumerate(zip(
+            info_frame.drop('color', axis=1).itertuples(
+                    index=False, name='ST'),
             info_frame['color']
-            ):
+            )):
         ax1.text(0, 1 - 0.2 * i, str(row), color=color)
     ax1.axis('off')
 
@@ -476,47 +479,16 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
     else:
         MT = matching(detected_angle, theo_angle)
 
-    fig = plt.figure(figsize=(14, 9))
-    gs = gridspec.GridSpec(2, 3)
+    fig, axes = plt.subplots(2, 3, figsize=(14, 9))
+    ax0, ax1, ax2, ax3, ax4, ax5 = axes.ravel()
 
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1])
-    ax2 = plt.subplot(gs[2])
-    ax3 = plt.subplot(gs[3])
-    ax4 = plt.subplot(gs[4])
-    ax5 = plt.subplot(gs[5])
-
-    slipPlot = GrainPlot(fig=fig, callingGrain=DicMap[k], ax=ax0)
-    slipPlot.addSlipTraces(topOnly=True)
-    #traces = slipPlot.addSlipTraces()
-    info_frame = get_slipsystem_info2(k, DicMap=DicMap)
-
-    #print the slip plane information
-
-    for i in range(0, len(info_frame)):
-        if info_frame[i][0] == 'Slip plane 1:':
-            Color = 'blue'
-        elif info_frame[i][0] == 'Slip plane 2:':
-            Color = 'green'
-        elif info_frame[i][0] == 'Slip plane 3:':
-            Color = 'red'
-        elif info_frame[i][0] == 'Slip plane 4:':
-            Color = 'purple'
-        ax1.text(0, 1 - 0.2 * i, '{}'.format(info_frame[i]), color=Color)
+    plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
     ax1.text(0,
              0.2,
              'Angle detected (Strain Map) = {}'.format(detected_angle),
              color='black',
              weight='bold')
-
-    grainMapData = take_shear_data(k, DicMap=DicMap)
-    #grain = DicMap[k].plotMaxShear(plotColourBar=True, plotScaleBar=True, vmin=0, vmax=0.1)
-    im = ax2.imshow(grainMapData,
-                    vmin=0,
-                    vmax=0.1,
-                    interpolation='bilinear',
-                    cmap='viridis')
 
     ax3.plot(angle_list)
     ax3.set_title('Band angle distribution')
