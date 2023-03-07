@@ -413,7 +413,7 @@ def matching(detected_angle, theo_angle):
 
 
 def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
-              DicMap, Noise_lim):
+              DicMap, Noise_lim, plot=False):
     """Run all the functionality in the library for a given grain.
 
     This function runs:
@@ -424,6 +424,9 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         - detect the angle with maximum intensity
         - detect other high intensity angles
         - match the angles to the theoretical angles given the slip system
+
+    If given `plot=False`, all the plotting functionality (which is the
+    slowest) is silenced.
 
     Parameters
     ----------
@@ -479,40 +482,50 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
     else:
         MT = matching(detected_angle, theo_angle)
 
-    fig, axes = plt.subplots(2, 3, figsize=(14, 9))
-    ax0, ax1, ax2, ax3, ax4, ax5 = axes.ravel()
+    if plot:
+        fig, axes = plt.subplots(2, 3, figsize=(14, 9))
+        ax0, ax1, ax2, ax3, ax4, ax5 = axes.ravel()
 
-    plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
+        plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
-    ax1.text(0,
-             0.2,
-             'Angle detected (Strain Map) = {}'.format(detected_angle),
-             color='black',
-             weight='bold')
+        ax1.text(0,
+                 0.2,
+                 'Angle detected (Strain Map) = {}'.format(detected_angle),
+                 color='black',
+                 weight='bold')
 
-    ax3.plot(angle_list)
-    ax3.set_title('Band angle distribution')
-    ax3.set_xlabel(r'Angle in degrees')
-    ax3.set_ylabel(r'Intensity')
+        ax3.plot(angle_list)
+        ax3.set_title('Band angle distribution')
+        ax3.set_xlabel(r'Angle in degrees')
+        ax3.set_ylabel(r'Intensity')
 
-    #Matching status
+        #Matching status
 
-    ax4.text(0,
-             1,
-             'Signal to Noise: {}'.format(SNR.round(3)),
-             color='green',
-             weight='bold',
-             fontsize=12)
-    if SNR != 0:
-        if SNR < Noise_lim:
-            if detected_angle != 'None':
-                ax4.text(0,
-                         1.2,
-                         'Slip bands detected',
-                         color='red',
-                         weight='bold',
-                         fontsize=12)
-                Sb_dected = 'True'
+        ax4.text(0,
+                 1,
+                 'Signal to Noise: {}'.format(SNR.round(3)),
+                 color='green',
+                 weight='bold',
+                 fontsize=12)
+        if SNR != 0:
+            if SNR < Noise_lim:
+                if detected_angle != 'None':
+                    ax4.text(0,
+                             1.2,
+                             'Slip bands detected',
+                             color='red',
+                             weight='bold',
+                             fontsize=12)
+                    Sb_dected = 'True'
+                else:
+                    ax4.text(0,
+                             0.8,
+                             'No slip bands detected',
+                             color='red',
+                             weight='bold',
+                             fontsize=12)
+                    MT = 'None'
+                    Sb_dected = 'False'
             else:
                 ax4.text(0,
                          0.8,
@@ -525,89 +538,80 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         else:
             ax4.text(0,
                      0.8,
-                     'No slip bands detected',
+                     'No slip band detected',
                      color='red',
                      weight='bold',
                      fontsize=12)
             MT = 'None'
             Sb_dected = 'False'
-    else:
-        ax4.text(0,
-                 0.8,
-                 'No slip band detected',
-                 color='red',
-                 weight='bold',
-                 fontsize=12)
-        MT = 'None'
-        Sb_dected = 'False'
 
-    if MT != 'None':
-        ax4.text(0,
-                 0.5,
-                 'Matched ={}'.format(MT),
-                 color='black',
-                 weight='bold',
-                 fontsize=12)
-    else:
-        ax4.text(0,
-                 0.5,
-                 'Matched:{}'.format(MT),
-                 color='red',
-                 weight='bold',
-                 fontsize=20)
-
-    if MT == 1:
-        ax4.text(0.2,
-                 0.8,
-                 'Agreed'.format(MT),
-                 color='red',
-                 weight='bold',
-                 fontsize=30)
-    elif type(MT) == list:
-        if MT[0] == 1 or MT[1] == 1:
-            ax4.text(0.1,
-                     0.8,
-                     'Agreed with one band'.format(MT),
+        if MT != 'None':
+            ax4.text(0,
+                     0.5,
+                     'Matched ={}'.format(MT),
+                     color='black',
+                     weight='bold',
+                     fontsize=12)
+        else:
+            ax4.text(0,
+                     0.5,
+                     'Matched:{}'.format(MT),
                      color='red',
                      weight='bold',
                      fontsize=20)
 
-    ax4.text(0.2, 0.4, '{}'.format(SDA), color='black', fontsize=10)
+        if MT == 1:
+            ax4.text(0.2,
+                     0.8,
+                     'Agreed'.format(MT),
+                     color='red',
+                     weight='bold',
+                     fontsize=30)
+        elif type(MT) == list:
+            if MT[0] == 1 or MT[1] == 1:
+                ax4.text(0.1,
+                         0.8,
+                         'Agreed with one band'.format(MT),
+                         color='red',
+                         weight='bold',
+                         fontsize=20)
 
-    if SNR < Noise_lim:
-        if BiSlip != 'None':
-            ax4.text(0.6, 1.2, ':{}'.format(BiSlip), color='red', fontsize=12)
-            ax4.text(0.1,
-                     1.1,
-                     '1: {0}   2: {1}'.format(detected_angle, Detected_Angle2),
-                     color='black',
-                     fontsize=12)
+        ax4.text(0.2, 0.4, '{}'.format(SDA), color='black', fontsize=10)
 
-    #Plot the filtered map
-    #shear_map = grainMapData
-    #threshold = detect_threshold
+        if SNR < Noise_lim:
+            if BiSlip != 'None':
+                ax4.text(0.6, 1.2, ':{}'.format(BiSlip), color='red', fontsize=12)
+                ax4.text(0.1,
+                         1.1,
+                         '1: {0}   2: {1}'.format(detected_angle, Detected_Angle2),
+                         color='black',
+                         fontsize=12)
 
-    median_filter = 3
+        #Plot the filtered map
+        #shear_map = grainMapData
+        #threshold = detect_threshold
 
-    if threshold != None:
-        shear_map_filt = shear_map > threshold
-        strain_title = 'Threshold: {:2.3f}'.format(threshold)
-    else:
-        shear_map_filt = shear_map
-        strain_title = 'Shear strain: no threshold'
+        median_filter = 3
 
-    if median_filter != None:
-        shear_map_filt = ndimage.median_filter(shear_map_filt,
-                                               size=median_filter)
+        if threshold != None:
+            shear_map_filt = shear_map > threshold
+            strain_title = 'Threshold: {:2.3f}'.format(threshold)
+        else:
+            shear_map_filt = shear_map
+            strain_title = 'Shear strain: no threshold'
 
-    ax5.imshow(shear_map_filt, cmap='viridis')
-    ax5.set_title(strain_title)
+        if median_filter != None:
+            shear_map_filt = ndimage.median_filter(shear_map_filt,
+                                                   size=median_filter)
 
-    ax0.axis('off')
-    ax1.axis('off')
-    ax2.axis('off')
-    ax4.axis('off')
-    ax5.axis('off')
+        ax5.imshow(shear_map_filt, cmap='viridis')
+        ax5.set_title(strain_title)
+
+        ax0.axis('off')
+        ax1.axis('off')
+        ax2.axis('off')
+        ax4.axis('off')
+        ax5.axis('off')
     return Sb_dected, MT, detected_angle, Detected_Angle2
 
 
