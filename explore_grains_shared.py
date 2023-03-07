@@ -323,9 +323,9 @@ def get_slipsystem_info2(grainID, DicMap):
     angles = [ST_Angle[i] for i in range(4)]
     frame = pd.DataFrame({
             'slip_plane': ids,
-            'slip_plane_label': labels,
+            'sp_label': labels,
             'sf': sfs,
-            'angle_degrees': angles,
+            'angle_degs': angles,
             'color': ['blue', 'green', 'red', 'purple'],
             })
     frame_sorted = frame.sort_values(
