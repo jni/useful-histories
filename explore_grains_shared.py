@@ -359,7 +359,7 @@ def plot_slip_trace(k, DicMap, axes=None):
 
     info_frame = get_slipsystem_info2(k, DicMap=DicMap)
     for i, (row, color) in enumerate(zip(
-            info_frame.drop('color', axis=1).itertuples(
+            info_frame.drop('color', axis=1).round(2).itertuples(
                     index=False, name='ST'),
             info_frame['color']
             )):
