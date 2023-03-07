@@ -681,9 +681,11 @@ def grain_explorer_traces(n,
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
 
-        plot_slip_trace(k, DicMap=DicMap)
-        plt.savefig(folder_name +
-                    '/Step {0}/Grain {1}/4 Slip traces'.format(n, k),
+        fig, axes = plt.subplots(1, 3)
+        plot_slip_trace(k, DicMap=DicMap, axes=axes)
+        os.makedirs(folder_name + f'/Step {n}/Grain {k}', exist_ok=True)
+        fig.savefig(folder_name +
+                    f'/Step {n}/Grain {k}/4 Slip traces',
                     dpi=300)
         plt.close()
 
