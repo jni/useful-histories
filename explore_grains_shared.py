@@ -328,10 +328,7 @@ def get_slipsystem_info2(grainID, DicMap):
             'angle_degs': angles,
             'color': ['blue', 'green', 'red', 'purple'],
             })
-    frame_sorted = frame.sort_values(
-            by='sf', ascending=False, ignore_index=True
-            )
-    return frame_sorted
+    return frame
 
 
 def plot_slip_trace(k, DicMap, axes=None):
@@ -353,15 +350,19 @@ def plot_slip_trace(k, DicMap, axes=None):
         ax0, ax1, ax2 = axes
         fig = ax0.figure
 
+    info_frame = get_slipsystem_info2(k, DicMap=DicMap)
+    frame_sorted = info_frame.sort_values(
+            by='sf', ascending=False, ignore_index=True
+            )
+
     slipPlot = GrainPlot(fig=fig, callingGrain=DicMap[k], ax=ax0)
-    slipPlot.addSlipTraces(topOnly=True)
+    slipPlot.addSlipTraces(topOnly=True, colours=info_frame['color'])
     ax0.axis('off')
 
-    info_frame = get_slipsystem_info2(k, DicMap=DicMap)
     for i, (row, color) in enumerate(zip(
-            info_frame.drop('color', axis=1).round(2).itertuples(
+            frame_sorted.drop('color', axis=1).round(2).itertuples(
                     index=False, name='ST'),
-            info_frame['color']
+            frame_sorted['color']
             )):
         ax1.text(0, 1 - 0.2 * i, str(row), color=color)
     ax1.axis('off')
