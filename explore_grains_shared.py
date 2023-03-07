@@ -489,11 +489,10 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
 
         plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
-        ax1.text(0,
-                 0.2,
-                 'Angle detected (Strain Map) = {}'.format(detected_angle),
-                 color='black',
-                 weight='bold')
+        ax1.text(0, 0.2,
+                f'Angle detected (Strain Map) = {detected_angle}',
+                color='black', weight='bold'
+                )
 
         ax3.plot(angle_list)
         ax3.set_title('Band angle distribution')
@@ -502,12 +501,10 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
 
         #Matching status
 
-        ax4.text(0,
-                 1,
-                 'Signal to Noise: {}'.format(SNR.round(3)),
-                 color='green',
-                 weight='bold',
-                 fontsize=12)
+        ax4.text(0, 1,
+                f'Signal to Noise: {SNR:.3f}',
+                color='green', weight='bold', fontsize=12
+                )
         if SNR != 0:
             if SNR < Noise_lim:
                 if detected_angle != 'None':
@@ -578,6 +575,7 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
                          fontsize=20)
 
         ax4.text(0.2, 0.4, '{}'.format(SDA), color='black', fontsize=10)
+        ax4.axis('off')
 
         if SNR < Noise_lim:
             if BiSlip != 'None':
@@ -607,12 +605,8 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
 
         ax5.imshow(shear_map_filt, cmap='viridis')
         ax5.set_title(strain_title)
-
-        ax0.axis('off')
-        ax1.axis('off')
-        ax2.axis('off')
-        ax4.axis('off')
         ax5.axis('off')
+
     return Sb_dected, MT, detected_angle, Detected_Angle2
 
 
@@ -623,8 +617,8 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
 
 def grain_explorer_traces(n,
                           DicMap,
-                          folder_name='None',
-                          Noise_lim='None',
+                          folder_name=None,
+                          Noise_lim=None,
                           Grain_filter=2500):
     """Function to explore grain traces for given stretch timestep.
 
@@ -647,17 +641,16 @@ def grain_explorer_traces(n,
         Noise_lim = 100
 
     # Create a folder for current step
-    dir = os.path.join(folder_name)
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+    if not os.path.exists(folder_name):
+        os.mkdir(folder_name)
 
-    dir = os.path.join(folder_name + '/Step {}'.format(n))
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+    folder_name_step = os.path.join(folder_name, f'Step {n}')
+    if not os.path.exists(folder_name_step):
+        os.mkdir(folder_name_step)
 
-    dir = os.path.join(folder_name + '/Step {}/Check'.format(n))
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+    folder_name_check = os.path.join(folder_name_step, 'Check')
+    if not os.path.exists(folder_name_check):
+        os.mkdir(folder_name_check)
 
     # Create a csv to save the information
     header = [
