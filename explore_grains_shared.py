@@ -664,7 +664,6 @@ def grain_explorer_traces(n,
     csvfile.close()
 
     grains = np.clip(DicMap.grains, 0, None)
-    grains[grains > 0] += 1
     max_shear = DicMap.crop(DicMap.data.max_shear)
     props = [prop
             for prop in measure.regionprops(grains, max_shear)
@@ -711,7 +710,9 @@ def grain_explorer_traces(n,
             shear_map=grainMapData,
             threshold=detect_threshold,
             DicMap=DicMap,
-            Noise_lim=Noise_lim)
+            Noise_lim=Noise_lim,
+            plot=True,
+            )
 
         plt.savefig(folder_name + '/Step {0}/Check/Grain {1}'.format(n, k),
                     dpi=300)
