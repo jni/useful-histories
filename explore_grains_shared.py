@@ -625,7 +625,8 @@ def grain_explorer_traces(n,
                           DicMap,
                           folder_name=None,
                           Noise_lim=None,
-                          Grain_filter=2500):
+                          Grain_filter=2500,
+                          plot=False):
     """Function to explore grain traces for given stretch timestep.
 
     Parameters
@@ -640,6 +641,8 @@ def grain_explorer_traces(n,
         The maximum SNR.
     Grain_filter : int
         The minimum grain size in pixels.
+    plot : bool
+        Whether to plot. Plotting is slow so if you can skip it you should!
     """
     if folder_name is None:
         folder_name = 'Slip Trace analysis2'
@@ -717,7 +720,7 @@ def grain_explorer_traces(n,
             threshold=detect_threshold,
             DicMap=DicMap,
             Noise_lim=Noise_lim,
-            plot=True,
+            plot=plot,
             )
 
         plt.savefig(folder_name + '/Step {0}/Check/Grain {1}'.format(n, k),
