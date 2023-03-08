@@ -666,7 +666,7 @@ def grain_explorer_traces(n,
         'Grain IDs', 'Theo Angle', 'Exp Angle', 'Matched', 'Band Detected',
         'SF1', 'SF2', 'SF3', 'SF4', 'Trace observed'
     ]
-    with open(folder_name + '/information {}.csv'.format(n), 'w',
+    with open(folder_name_check + '/information {}.csv'.format(n), 'w',
               newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(header)
@@ -741,7 +741,7 @@ def grain_explorer_traces(n,
                 SF_list[0], SF_list[1], SF_list[2], SF_list[3]
             ]]
 
-        with open(folder_name + '/information {}.csv'.format(n),
+        with open(folder_name_check + '/information {}.csv'.format(n),
                   'a',
                   newline='') as csvfile:
             writer = csv.writer(csvfile)
