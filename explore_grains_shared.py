@@ -498,8 +498,8 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
                 color='black', weight='bold'
                 )
 
-        angle_arr = np.concatenate([angle_list, angle_list])
-        angles = np.linspace(0, 2*np.pi, 360, endpoint=False)
+        angle_arr = np.concatenate([angle_list, angle_list, [angle_list[0]]])
+        angles = np.linspace(0, 2*np.pi, 361, endpoint=True)
         ax3.plot(angles, angle_arr)
         ax3.set_title('Band angle distribution')
         ax3.set_xlabel(r'Angle in degrees')
