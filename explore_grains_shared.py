@@ -683,14 +683,6 @@ def grain_explorer_traces(n,
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
 
-        fig, axes = plt.subplots(1, 3)
-        plot_slip_trace(k, DicMap=DicMap, axes=axes)
-        os.makedirs(folder_name + f'/Step {n}/Grain {k}', exist_ok=True)
-        fig.savefig(folder_name +
-                    f'/Step {n}/Grain {k}/4 Slip traces',
-                    dpi=300)
-        plt.close()
-
         # gert the mean max shear strain of the grain
         mean_shear_strain = np.mean(DicMap[k].maxShearList)
         detect_threshold = max(1.6 * mean_shear_strain, 0.013)
