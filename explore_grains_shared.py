@@ -485,7 +485,11 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
 
     if plot:
         fig, axes = plt.subplots(2, 3, figsize=(14, 9))
-        ax0, ax1, ax2, ax3, ax4, ax5 = axes.ravel()
+        fig = plt.figure(figsize=(14, 9))
+        ax0, ax1, ax2, ax4, ax5 = (fig.add_subplot(230 + i)
+                                   for i in [1, 2, 3, 5, 6])
+        ax3 = fig.add_subplot(234, projection='polar')
+        ax3.set_theta_zero_location('S')
 
         plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
@@ -494,7 +498,9 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
                 color='black', weight='bold'
                 )
 
-        ax3.plot(angle_list)
+        angle_arr = np.concatenate([angle_list, angle_list])
+        angles = np.linspace(0, 2*np.pi, 360, endpoint=False)
+        ax3.plot(angles, angle_arr)
         ax3.set_title('Band angle distribution')
         ax3.set_xlabel(r'Angle in degrees')
         ax3.set_ylabel(r'Intensity')
