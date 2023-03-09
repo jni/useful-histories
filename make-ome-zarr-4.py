@@ -1,14 +1,14 @@
 # IPython log file
 
 import ome_zarr
-from bellarine import _imdir as imdir
+from ont import imreads
 from ome_zarr.io import parse_url
 from ome_zarr.writer import write_multiscale
 from ome_zarr.writer import write_multiscales_metadata
 import zarr
 
 # imdir load_images reads nested directories of image files into dask ndarray
-arr = imdir.load_images('01', '*.tif')
+arr = imreads('01', '*.tif')
 # trim edges so each axis is divisible by 4
 arr_mid = arr[:, 2:-1, 2:-1, :-1]
 
