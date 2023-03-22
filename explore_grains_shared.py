@@ -145,7 +145,7 @@ def signaltonoise(a, axis=0, ddof=0):
     return np.where(sd == 0, 0, m / sd)
 
 
-def sb_angle(shear_map, threshold=None, median_filter=None):
+def sb_angle(shear_map, threshold=None, median_filter=None, plot=False):
     """Compute slip band angles based on shear map.
 
     Uses a threshold to reduce noise, optionally followed by a median filter,
@@ -160,6 +160,8 @@ def sb_angle(shear_map, threshold=None, median_filter=None):
     median_filter : int or None
         The size of the median filter to apply for denoising. None means no
         median filter is applied.
+    plot : bool or str
+        False, or a path to a file in which to save the plot.
 
     Returns
     -------
@@ -182,25 +184,24 @@ def sb_angle(shear_map, threshold=None, median_filter=None):
     sin_map = radon(shear_map_filt)
     profile_filt = np.max(sin_map, axis=0)
 
-    plt.figure(figsize=(13, 5))
-    gs = gridspec.GridSpec(1, 3)
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1])
-    ax2 = plt.subplot(gs[2])
-    ax0.imshow(shear_map_filt, cmap='viridis')
+    if plot:
+        fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(13, 5))
 
-    ax0.set_title(strain_title)
-    ax1.imshow(sin_map, cmap='viridis')
-    ax1.set_title('Sinogram')
+        ax0.imshow(shear_map_filt, cmap='viridis')
+        ax0.set_title(strain_title)
+
+        ax1.imshow(sin_map, cmap='viridis')
+        ax1.set_title('Sinogram')
+
+        ax2.plot(profile_filt)
+        ax2.set_title('Band angle distribution')
+        ax2.set_xlabel(r'Angle in degrees')
+        ax2.set_ylabel(r'Intensity')
+
+        fig.savefig(plot, dpi=300)
+
     #angles_index = signal.find_peaks_cwt(profile_filt,np.arange(1,10))
     angles_index = signal.find_peaks(profile_filt, prominence=5)
-
-    #print('angles =',angles_index)
-    ax2.plot(profile_filt)
-    #print(profile_filt)
-    ax2.set_title('Band angle distribution')
-    ax2.set_xlabel(r'Angle in degrees')
-    ax2.set_ylabel(r'Intensity')
     return profile_filt.tolist(), angles_index
 
 
