@@ -326,7 +326,7 @@ def get_slipsystem_info2(grainID, DicMap):
             'slip_plane': ids,
             'sp_label': labels,
             'sf': sfs,
-            'angle_degs': angles,
+            'angle_deg': angles,
             'color': ['blue', 'green', 'red', 'purple'],
             })
     return frame
@@ -492,6 +492,7 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         ax3 = fig.add_subplot(234, projection='polar')
         ax3.set_theta_zero_location('S')
 
+        slip_trace_angles_deg = np.rad2deg(DicMap[k].slipTraces)
         plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
         ax1.text(0, 0.2,
@@ -614,12 +615,9 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         ax5.set_title(strain_title)
         ax5.axis('off')
 
+        fig = fig.savefig(plot, dpi=300)
+
     return Sb_dected, MT, detected_angle, Detected_Angle2
-
-
-###
-#    Function required: 1. get_slipsystem_info 2. sb_angle 3. check_all
-###
 
 
 def grain_explorer_traces(n,
@@ -680,6 +678,13 @@ def grain_explorer_traces(n,
             if prop.area > Grain_filter]
     for prop in tqdm(props):
         k = prop.label - 1  # position in DicMap list
+
+        if plot:
+            folder_name_grain = os.path.join([folder_name_step, f'Grain {k}'])
+            os.makedirs(folder_name_grain, exist_ok=True)
+        else:
+            folder_name_grain = False
+
         # grainMapData = take_shear_data(k, DicMap=DicMap)
         grainMapData = prop.intensity_image
         grainMapData[~prop.image] = np.nan
@@ -689,16 +694,18 @@ def grain_explorer_traces(n,
         detect_threshold = max(1.6 * mean_shear_strain, 0.013)
 
         # get the theo angle
+        slip_system_df = get_slipsystem_info2(k, DicMap=DicMap)
+        slip_system_df['grain_id'] = k
+        # theo angle = slip_system_df['angle_deg']
+        # sf list = slip_system_df['sf']
         theo_angle, SF_list = get_slipsystem_info(k, DicMap=DicMap)
 
         # get the experimental angle
+        radon_plot_fn = plot and os.path.join([folder_name_grain, 'radon.png'])
         angle_list, angle_index = sb_angle(grainMapData,
                                            threshold=detect_threshold,
-                                           median_filter=3)
-
-        plt.savefig(folder_name + '/Step {0}/Grain {1}/Radon'.format(n, k),
-                    dpi=300)
-        plt.close()
+                                           median_filter=3,
+                                           plot=radon_plot_fn)
 
         #detected_angle = detect_angle(angle_list,angle_index)
         #SDA,bottom = save_detected_angles(angle_list,angle_index)
@@ -713,12 +720,8 @@ def grain_explorer_traces(n,
             threshold=detect_threshold,
             DicMap=DicMap,
             Noise_lim=Noise_lim,
-            plot=plot,
+            plot=plot and os.path.join([folder_name_check, f'Grain {i}.png']),
             )
-
-        plt.savefig(folder_name + '/Step {0}/Check/Grain {1}'.format(n, k),
-                    dpi=300)
-        plt.close()
 
         if detected_angle2 != 'None':
             detected_angles = []
