@@ -316,7 +316,7 @@ def get_slipsystem_info2(grainID, DicMap):
 
     #Calculate the slip trace angles
     DicMap[grainID].ebsdGrain.calcSlipTraces()
-    ST_Angle = np.rad2deg(DicMap[grainID].ebsdGrain.slipTraceAngles)
+    ST_Angle = np.rad2deg(DicMap[grainID].ebsdGrain.slipTraceAngles) % 360
 
     ids = np.arange(1, 5)
     labels = [ssGroup[i][0].slipPlaneLabel for i in range(4)]
@@ -359,6 +359,7 @@ def plot_slip_trace(k, DicMap, axes=None):
     slipPlot = GrainPlot(fig=fig, callingGrain=DicMap[k], ax=ax0)
     slipPlot.addSlipTraces(topOnly=True, colours=info_frame['color'])
     ax0.axis('off')
+    ax0.set_aspect('equal')
 
     for i, (row, color) in enumerate(zip(
             frame_sorted.drop('color', axis=1).round(2).itertuples(
@@ -491,7 +492,6 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         ax3 = fig.add_subplot(234, projection='polar')
         ax3.set_theta_zero_location('S')
 
-        slip_trace_angles_deg = np.rad2deg(DicMap[k].slipTraces)
         plot_slip_trace(k, DicMap, axes=(ax0, ax1, ax2))
 
         ax1.text(0, 0.2,
@@ -504,7 +504,18 @@ def check_all(k, angle_list, theo_angle, angle_index, shear_map, threshold,
         ax3.plot(angles, angle_arr)
         ax3.set_title('Band angle distribution')
         ax3.set_xlabel(r'Angle in degrees')
-        ax3.set_ylabel(r'Intensity')
+        # slip_trace_angles_deg = np.rad2deg(DicMap[k].slipTraces)
+        slip_system_df = get_slipsystem_info2(k, DicMap=DicMap)
+        slip_system_df['grain_id'] = k
+        slip_system_df['angle_deg_180'] = (
+                slip_system_df['angle_deg'] + 180
+                ) % 360
+        for row in slip_system_df.itertuples(index=False):
+            ax3.vlines(
+                    np.radians([row.angle_deg, row.angle_deg_180]),
+                    ymin=0, ymax=1.05 * np.max(angle_arr),
+                    colors=row.color
+                    )
 
         #Matching status
 
